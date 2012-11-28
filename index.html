@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Shake It!</title>
+		
+		<!-- iOS WebApp Metatags -->
+		<meta name="viewport" content="width=device-width, initial-scale=1 , maximum-scale=1">
+		<meta name="apple-mobile-web-app-capable" content="yes" >
+
+		<!-- Homescreen Icons für iOS und Android -->
+		<link rel="apple-touch-icon-precomposed" href="bilder/icon-ipad.png" sizes="72x72" />
+		<link rel="apple-touch-icon-precomposed" href="bilder/icon-ipad-retina.png" sizes="144x144" />
+		<link rel="apple-touch-icon-precomposed" href="bilder/icon-iphone-retina.png" sizes="114x114" />
+		<link rel="apple-touch-icon-precomposed" href="bilder/icon-iphone.png" />
+
+		<!-- CSS Stylesheet -->
+		<link href="styles/styles.css" rel="stylesheet">
+		
+	</head>
+	<body>
+		<!-- HTML-Gerüst -->
+
+			<!-- Polaroid-->
+		<div class="polaroid-rahmen">
+			<div class="flickr-bild"></div>
+		</div>
+		<footer>
+			<button>Foto machen!</button>
+		</footer>
+		
+		
+		
+		
+		<!-- jQuery  -->
+		<script src="javascript/jquery-1.8.3.min.js" type="text/javascript"</script>
+		
+		<!--Phonegab-->
+		<script src="PhoneGab.js" type="text/javascript" charset="utf-8"></script>
+		
+		<!-- Shake Plugin -->
+		<script src="javascript/shake.js" type="text/javascript"></script>
+		
+		<!-- Generell sollte JavaScript immer ans Ende des HTML-Dokuments geschrieben werden -->
+		<script>
+			var geschuettelt = false;
+			
+			$(function(){
+				// Adressleiste verbergen
+				window.scrollTo(0,1);
+				
+				//Altes Polaroid verschwinden lassen
+				var polaroidweg = function() { 
+					$('.flickr-bild').toggleClass('sichtbar');
+					$('.polaroid-rahmen').css("-webkit-transform", "rotate(" + (Math.floor(Math.random() * 180)-90) +  "deg)");
+					$('.polaroid-rahmen').toggleClass('sichtbar');
+					setTimeout(function() {
+						neuespolaroid();
+					}, 1000);
+				};
+				
+				// Neues Polaroid einblenden
+				var neuespolaroid = function() {
+				
+					//Ein Foto Aufnehmen
+					navigator.camera.getPicture(onSuccess,onFail, {
+					quality:10,
+					destinatinType: Camera.DestinationType.FILE_URI,
+					targetWidth: 400,
+					targetWidth: 400
+					});
+				
+				function onSuccess(imageURI) {
+				
+					// Polaroid einfliegen lassen
+					// Leichte Rotation per Zufall
+					rotation = Math.floor(Math.random() * 10)-5;
+					
+					$('.polaroid-rahmen').css("-webkit-transform", "rotate(" + rotation +  "deg)").toggleClass('sichtbar');
+			
+					// Geschuettelt wieder auf 0 setzen
+					geschuettelt = false;
+					
+						// Das Bild als Hintergrundbild des Containers festlegen
+	     				$('.flickr-bild').css("background","url(" + randomImageCorrect + ")");
+					
+						// Text des Buttons ändern
+						$('button').text("Und jetzt, shake it!").toggleClass("shakeit");
+				
+				}
+				
+				function onFail(message){
+				aler('Foto ging nicht: ' +message);
+				}
+					
+				// Eventhandler: Button
+				$('button').on('click', function(){
+					if(geschuettelt) {
+						polaroidweg();
+					} else {
+						neuespolaroid();
+					}	
+				});
+				
+				// Eventhandler: Shake
+				var onShake = function() {     
+					if(!geschuettelt) {
+						// CSS Klasse austauschen und Bild einblenden
+						$('.flickr-bild').toggleClass('sichtbar');
+						$('button').text("Neues Polaroid!").toggleClass("shakeit");
+						geschuettelt = true;
+					}
+				};
+				
+				// Shake Plugin
+				window.onload = function() {
+
+					window.addEventListener('shake', shakeEventDidOccur, false);
+	
+					//define a custom method to fire when shake occurs.
+					function shakeEventDidOccur () {
+	
+						//put your own code here etc.
+						onShake();
+					}
+				};
+				
+			});
+		</script>
+	</body>
+</html>
